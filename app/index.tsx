@@ -38,9 +38,9 @@ export default function TodoScreen() {
 
   const filteredTodos = useMemo(() => {
     if (!todos) return [];
-    
+
     let filtered = todos.filter(t => {
-      const matchesSearch = search === '' || 
+      const matchesSearch = search === '' ||
         t.title.toLowerCase().includes(search.toLowerCase()) ||
         t.description?.toLowerCase().includes(search.toLowerCase());
       const matchesFilter = filter === 'all' ||
@@ -98,10 +98,9 @@ export default function TodoScreen() {
       />
     </TouchableOpacity>
   );
-
-  const gradientColors = mode === 'light' 
-    ? ['rgba(183, 148, 246, 0.8)', 'rgba(125, 211, 252, 0.8)'] as const
-    : ['rgba(91, 33, 182, 0.85)', 'rgba(30, 58, 138, 0.85)'] as const;
+  const gradientColors: readonly [string, string] = mode === 'light'
+    ? ['rgba(55, 16, 189, 0.7)', 'rgba(164, 35, 149, 0.7)'] as const // Lighter opacity for light mode
+    : ['rgba(55, 16, 189, 0.9)', 'rgba(164, 35, 149, 0.9)'] as const;  // Darker opacity for dark mode
 
   // Background image URL - you can replace with your own image
   const bgImage = mode === 'light'
@@ -125,93 +124,91 @@ export default function TodoScreen() {
           resizeMode="cover"
         >
           <LinearGradient colors={gradientColors} style={styles.headerGradient}>
-            <SafeAreaView>
-              <View style={styles.header}>
-                <Text style={styles.title}>TODO</Text>
-                <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
-                  <Ionicons 
-                    name={mode === 'light' ? 'moon-outline' : 'sunny-outline'} 
-                    size={26} 
-                    color="#FFFFFF" 
-                  />
-                </TouchableOpacity>
-              </View>
+            <SafeAreaView style={styles.safeArea}>
+              <View style={styles.headerWrapper}>
+                <View style={styles.header}>
+                  <Text style={styles.title}>TODO</Text>
+                  <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
+                    <Ionicons
+                      name={mode === 'light' ? 'moon-outline' : 'sunny-outline'}
+                      size={26}
+                      color="#FFFFFF"
+                    />
+                  </TouchableOpacity>
+                </View>
 
-              <View style={[styles.searchContainer, { backgroundColor: theme.inputBg }]}>
-                <TextInput
-                  style={[styles.searchInput, { color: theme.text }]}
-                  placeholder="Currently typing"
-                  placeholderTextColor={theme.textPlaceholder}
-                  value={search}
-                  onChangeText={setSearch}
-                />
+               <TouchableOpacity
+                      style={[styles.addButton, { backgroundColor: theme.inputBg }]}
+                      onPress={() => setFormVisible(true)}
+                    >
+                      <Text style={[styles.addButtonText, { color: theme.textPlaceholder }]}>
+                        Create a new todo...
+                      </Text>
+                    </TouchableOpacity>
               </View>
             </SafeAreaView>
           </LinearGradient>
         </ImageBackground>
 
         <View style={[styles.contentArea, { backgroundColor: mode === 'light' ? '#F5F5F5' : '#1a1a1a' }]}>
-          <View style={[styles.contentCard, { backgroundColor: theme.surface }]}>
-            {filteredTodos.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={[styles.emptyText, { color: theme.textTertiary }]}>
-                  {search ? 'No todos found' : 'No todos yet'}
-                </Text>
-              </View>
-            ) : (
-              <>
-                <DraggableFlatList
-                  data={filteredTodos}
-                  renderItem={renderTodoItem}
-                  keyExtractor={item => item._id}
-                  onDragEnd={handleDragEnd}
-                  contentContainerStyle={styles.todoList}
-                  showsVerticalScrollIndicator={false}
-                />
-                
-                <View style={styles.stats}>
-                  <Text style={[styles.statsText, { color: theme.textTertiary }]}>
-                    {stats.active} items left
+          <View style={styles.contentWrapper}>
+            <View style={[styles.contentCard, { backgroundColor: theme.surface }]}>
+              {filteredTodos.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <Text style={[styles.emptyText, { color: theme.textTertiary }]}>
+                    {search ? 'No todos found' : 'No todos yet'}
                   </Text>
-                  <TouchableOpacity>
-                    <Text style={[styles.clearCompleted, { color: theme.textTertiary }]}>
-                      Clear Completed
-                    </Text>
-                  </TouchableOpacity>
                 </View>
-              </>
-            )}
+              ) : (
+                <>
+                  <View style={styles.todoContainer}>
+                    <DraggableFlatList
+                      data={filteredTodos}
+                      renderItem={renderTodoItem}
+                      keyExtractor={item => item._id}
+                      onDragEnd={handleDragEnd}
+                      contentContainerStyle={styles.todoList}
+                      showsVerticalScrollIndicator={false}
+                    />
 
-            <View style={styles.filters}>
-              {(['all', 'active', 'completed'] as const).map(f => (
-                <TouchableOpacity
-                  key={f}
-                  onPress={() => setFilter(f)}
-                  style={styles.filterBtn}
-                >
-                  <Text style={[
-                    styles.filterText,
-                    { color: filter === f ? theme.filterActive : theme.filterInactive },
-                    filter === f && styles.filterTextActive
-                  ]}>
-                    {f.charAt(0).toUpperCase() + f.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <View style={styles.stats}>
+                      <Text style={[styles.statsText, { color: theme.textTertiary }]}>
+                        {stats.active} items left
+                      </Text>
+                      <TouchableOpacity>
+                        <Text style={[styles.clearCompleted, { color: theme.textTertiary }]}>
+                          Clear Completed
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.filters}>
+                      {(['all', 'active', 'completed'] as const).map(f => (
+                        <TouchableOpacity
+                          key={f}
+                          onPress={() => setFilter(f)}
+                          style={styles.filterBtn}
+                        >
+                          <Text style={[
+                            styles.filterText,
+                            { color: filter === f ? theme.filterActive : theme.filterInactive },
+                            filter === f && styles.filterTextActive
+                          ]}>
+                            {f.charAt(0).toUpperCase() + f.slice(1)}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    <Text style={[styles.dragHint, { color: theme.textTertiary }]}>
+                      Drag and drop to reorder list
+                    </Text>
+
+                    
+                  </View>
+                </>
+              )}
+
             </View>
-
-            <Text style={[styles.dragHint, { color: theme.textTertiary }]}>
-              Drag and drop to reorder list
-            </Text>
-
-            <TouchableOpacity
-              style={[styles.addButton, { backgroundColor: theme.inputBg }]}
-              onPress={() => setFormVisible(true)}
-            >
-              <Text style={[styles.addButtonText, { color: theme.textPlaceholder }]}>
-                Create a new todo...
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -238,6 +235,11 @@ const styles = StyleSheet.create({
   },
   headerGradient: {
     flex: 1,
+    alignItems: 'center',
+  },
+  headerWrapper: {
+    width: '100%',
+    maxWidth: 540,
     paddingHorizontal: 20,
   },
   header: {
@@ -246,6 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 20,
     paddingBottom: 30,
+    marginTop: 20,
   },
   title: {
     fontSize: 32,
@@ -259,27 +262,43 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  safeArea: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+  },
   searchContainer: {
-    borderRadius: 6,
+    borderRadius: 5,
     marginBottom: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
   },
   searchInput: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '400',
   },
   contentArea: {
     flex: 1,
-    paddingHorizontal: 20,
+    alignItems: 'center',
     paddingTop: 20,
+  },
+  contentWrapper: {
+    width: '100%',
+    maxWidth: 540,
+    flex: 1,
+    paddingHorizontal: 20,
   },
   contentCard: {
     flex: 1,
-    borderRadius: 8,
+    borderRadius: 5,
     padding: 20,
+    marginTop: -70,
+  },
+  todoContainer: {
+    flex: 1,
   },
   todoList: {
+    flexGrow: 1,  // Change from just paddingBottom
     paddingBottom: 10,
   },
   emptyState: {
@@ -323,16 +342,16 @@ const styles = StyleSheet.create({
   },
   dragHint: {
     textAlign: 'center',
-    fontSize: 12,
+    fontSize: 14,
     paddingVertical: 12,
   },
   addButton: {
-    borderRadius: 6,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    borderRadius: 5,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
     marginTop: 10,
   },
   addButtonText: {
-    fontSize: 16,
+    fontSize: 18,
   },
 });
