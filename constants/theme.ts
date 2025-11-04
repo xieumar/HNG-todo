@@ -1,35 +1,73 @@
 export const lightTheme = {
-  background: '#F5F5F5',
+  // Backgrounds
+  background: 'linear-gradient(180deg, #B794F6 0%, #7DD3FC 100%)',
+  backgroundSolid: '#E0E7FF',
   surface: '#FFFFFF',
-  surfaceSecondary: '#F8F9FA',
-  primary: '#6366F1',
-  primaryDark: '#4F46E5',
+  cardBg: '#FFFFFF',
+  inputBg: '#FFFFFF',
+  
+  // Text
   text: '#1F2937',
   textSecondary: '#6B7280',
   textTertiary: '#9CA3AF',
+  textPlaceholder: '#D1D5DB',
+  
+  // Primary
+  primary: '#6366F1',
+  primaryLight: '#818CF8',
+  
+  // States
+  completed: '#9CA3AF',
+  completedBg: '#F3F4F6',
+  
+  // UI Elements
   border: '#E5E7EB',
-  error: '#EF4444',
-  success: '#10B981',
-  completed: '#D1D5DB',
-  shadow: '#000000',
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  shadow: 'rgba(0, 0, 0, 0.1)',
+  overlay: 'rgba(0, 0, 0, 0.4)',
+  
+  // Filter tabs
+  filterActive: '#6366F1',
+  filterInactive: '#6B7280',
+  
+  // Icon
+  icon: '#1F2937',
+  iconSecondary: '#9CA3AF',
 };
 
 export const darkTheme = {
-  background: '#0F172A',
-  surface: '#1E293B',
-  surfaceSecondary: '#334155',
+  // Backgrounds
+  background: 'linear-gradient(180deg, #5B21B6 0%, #1E3A8A 100%)',
+  backgroundSolid: '#1E293B',
+  surface: '#2D3748',
+  cardBg: '#2D3748',
+  inputBg: '#374151',
+  
+  // Text
+  text: '#F9FAFB',
+  textSecondary: '#D1D5DB',
+  textTertiary: '#9CA3AF',
+  textPlaceholder: '#6B7280',
+  
+  // Primary
   primary: '#818CF8',
-  primaryDark: '#6366F1',
-  text: '#F1F5F9',
-  textSecondary: '#CBD5E1',
-  textTertiary: '#64748B',
-  border: '#334155',
-  error: '#F87171',
-  success: '#34D399',
-  completed: '#475569',
-  shadow: '#000000',
-  overlay: 'rgba(0, 0, 0, 0.7)',
+  primaryLight: '#A5B4FC',
+  
+  // States
+  completed: '#6B7280',
+  completedBg: '#374151',
+  
+  // UI Elements
+  border: '#4B5563',
+  shadow: 'rgba(0, 0, 0, 0.3)',
+  overlay: 'rgba(0, 0, 0, 0.6)',
+  
+  // Filter tabs
+  filterActive: '#818CF8',
+  filterInactive: '#9CA3AF',
+  
+  // Icon
+  icon: '#F9FAFB',
+  iconSecondary: '#9CA3AF',
 };
 
 export type Theme = typeof lightTheme;

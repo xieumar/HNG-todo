@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
-import { Swipeable } from 'react-native-gesture-handler';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../hooks/useTheme';
 import { useMutation } from 'convex/react';
@@ -23,104 +22,104 @@ export const TodoItem = ({ id, title, description, dueDate, completed, onEdit }:
 
   const toggleComplete = () => updateTodo({ id, completed: !completed });
 
-  const renderRightActions = (progress: Animated.AnimatedInterpolation<number>) => {
-    const trans = progress.interpolate({ inputRange: [0, 1], outputRange: [100, 0] });
-    
-    return (
-      <Animated.View style={[styles.rightActions, { transform: [{ translateX: trans }] }]}>
-        <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: theme.primary }]}
-          onPress={onEdit}
-        >
-          <Ionicons name="pencil" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: theme.error }]}
-          onPress={() => deleteTodo({ id })}
-        >
-          <Ionicons name="trash" size={24} color="#FFF" />
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  };
-
   return (
-    <Swipeable renderRightActions={renderRightActions}>
-      <View style={[styles.container, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-        <TouchableOpacity onPress={toggleComplete} style={styles.checkbox}>
-          <View style={[
-            styles.checkboxBox,
-            { borderColor: completed ? theme.primary : theme.border },
-            completed && { backgroundColor: theme.primary }
-          ]}>
-            {completed && <Ionicons name="checkmark" size={16} color="#FFF" />}
-          </View>
-        </TouchableOpacity>
-
-        <View style={styles.content}>
-          <Text style={[
-            styles.title,
-            { color: theme.text },
-            completed && { textDecorationLine: 'line-through', color: theme.textTertiary }
-          ]}>
-            {title}
-          </Text>
-          {description && (
-            <Text style={[styles.description, { color: theme.textSecondary }]} numberOfLines={2}>
-              {description}
-            </Text>
-          )}
-          {dueDate && (
-            <View style={styles.dateContainer}>
-              <Ionicons name="calendar-outline" size={14} color={theme.textTertiary} />
-              <Text style={[styles.date, { color: theme.textTertiary }]}>
-                {new Date(dueDate).toLocaleDateString()}
-              </Text>
-            </View>
+    <View style={[styles.container, { backgroundColor: theme.cardBg }]}>
+      {/* Checkbox */}
+      <TouchableOpacity onPress={toggleComplete} style={styles.checkbox}>
+        <View style={[
+          styles.checkboxCircle,
+          { borderColor: completed ? theme.primary : theme.border },
+          completed && { backgroundColor: theme.primary }
+        ]}>
+          {completed && (
+            <Ionicons name="checkmark" size={16} color="#FFFFFF" />
           )}
         </View>
+      </TouchableOpacity>
+
+      {/* Content */}
+      <View style={styles.content}>
+        <Text style={[
+          styles.title,
+          { color: theme.text },
+          completed && { 
+            textDecorationLine: 'line-through', 
+            color: theme.completed 
+          }
+        ]}>
+          {title}
+        </Text>
+        
+        {description && (
+          <Text style={[
+            styles.description, 
+            { color: theme.textSecondary },
+            completed && { color: theme.completed }
+          ]} numberOfLines={2}>
+            {description}
+          </Text>
+        )}
+        
+        {dueDate && (
+          <Text style={[
+            styles.date, 
+            { color: theme.textTertiary },
+            completed && { color: theme.completed }
+          ]}>
+            {new Date(dueDate).toLocaleDateString()}
+          </Text>
+        )}
       </View>
-    </Swipeable>
+
+      {/* Delete Button */}
+      <TouchableOpacity
+        onPress={() => deleteTodo({ id })}
+        style={styles.deleteBtn}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <Ionicons name="close" size={20} color={theme.textTertiary} />
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    alignItems: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    borderRadius: 4,
   },
-  checkbox: { marginRight: 12, justifyContent: 'center' },
-  checkboxBox: {
+  checkbox: {
+    marginRight: 12,
+  },
+  checkboxCircle: {
     width: 24,
     height: 24,
-    borderRadius: 6,
+    borderRadius: 12,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  content: { flex: 1 },
-  title: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
-  description: { fontSize: 14, marginBottom: 6 },
-  dateContainer: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  date: { fontSize: 12 },
-  rightActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  content: {
+    flex: 1,
   },
-  actionBtn: {
-    width: 60,
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
+  title: {
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 2,
+  },
+  description: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+  date: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  deleteBtn: {
+    padding: 4,
   },
 });
