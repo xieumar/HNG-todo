@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, SafeAreaView, ActivityIndicator, ImageBackground
+  View, Text, TextInput, TouchableOpacity, Dimensions,
+  StyleSheet, SafeAreaView, ActivityIndicator, ImageBackground, ScrollView, Platform
 } from 'react-native';
-import DraggableFlatList, { RenderItemParams } from 'react-native-draggable-flatlist';
+import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,6 +13,9 @@ import { api } from '../convex/_generated/api';
 import { TodoItem } from '../components/TodoItem';
 import { TodoForm } from '../components/TodoForm';
 import { Id } from '../convex/_generated/dataModel';
+
+
+const { width } = Dimensions.get('window');
 
 type Todo = {
   _id: Id<"todos">;
@@ -29,6 +32,7 @@ export default function TodoScreen() {
   const todos = useQuery(api.todos.list);
   const createTodo = useMutation(api.todos.create);
   const updateTodo = useMutation(api.todos.update);
+  const deleteTodo = useMutation(api.todos.remove);
   const reorderTodos = useMutation(api.todos.reorder);
 
   const [search, setSearch] = useState('');
@@ -70,6 +74,14 @@ export default function TodoScreen() {
     }
   };
 
+  const handleClearCompleted = async () => {
+    if (!todos) return;
+    const completedTodos = todos.filter(t => t.completed);
+    for (const todo of completedTodos) {
+      await deleteTodo({ id: todo._id });
+    }
+  };
+
   const handleDragEnd = ({ data }: { data: Todo[] }) => {
     const updates = data.map((item, idx) => ({
       id: item._id,
@@ -79,33 +91,35 @@ export default function TodoScreen() {
   };
 
   const renderTodoItem = ({ item, drag, isActive }: RenderItemParams<Todo>) => (
-    <TouchableOpacity
-      onLongPress={drag}
-      disabled={isActive}
-      style={{ opacity: isActive ? 0.7 : 1 }}
-      activeOpacity={0.9}
-    >
-      <TodoItem
-        id={item._id}
-        title={item.title}
-        description={item.description}
-        dueDate={item.dueDate}
-        completed={item.completed}
-        onEdit={() => {
-          setEditingTodo(item);
-          setFormVisible(true);
-        }}
-      />
-    </TouchableOpacity>
+    <ScaleDecorator>
+      <TouchableOpacity
+        onLongPress={drag}
+        disabled={isActive}
+        style={{ opacity: isActive ? 0.7 : 1 }}
+        activeOpacity={0.9}
+      >
+        <TodoItem
+          id={item._id}
+          title={item.title}
+          description={item.description}
+          dueDate={item.dueDate}
+          completed={item.completed}
+          onEdit={() => {
+            setEditingTodo(item);
+            setFormVisible(true);
+          }}
+        />
+      </TouchableOpacity>
+    </ScaleDecorator>
   );
-  const gradientColors: readonly [string, string] = mode === 'light'
-    ? ['rgba(55, 16, 189, 0.7)', 'rgba(164, 35, 149, 0.7)'] as const // Lighter opacity for light mode
-    : ['rgba(55, 16, 189, 0.9)', 'rgba(164, 35, 149, 0.9)'] as const;  // Darker opacity for dark mode
 
-  // Background image URL - you can replace with your own image
+  const gradientColors: readonly [string, string] = mode === 'light'
+    ? ['rgba(55, 16, 189, 0.7)', 'rgba(164, 35, 149, 0.7)']
+    : ['rgba(55, 16, 189, 0.9)', 'rgba(164, 35, 149, 0.9)'];
+
   const bgImage = mode === 'light'
-    ? 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80' // Mountains light
-    : 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80'; // Mountains dark
+    ? 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80'
+    : 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80';
 
   if (todos === undefined) {
     return (
@@ -126,7 +140,7 @@ export default function TodoScreen() {
           <LinearGradient colors={gradientColors} style={styles.headerGradient}>
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.headerWrapper}>
-                <View style={styles.header}>
+                <View style={[styles.header, Platform.OS === 'android' && { marginTop: 40 }]}>
                   <Text style={styles.title}>TODO</Text>
                   <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
                     <Ionicons
@@ -137,14 +151,14 @@ export default function TodoScreen() {
                   </TouchableOpacity>
                 </View>
 
-               <TouchableOpacity
-                      style={[styles.addButton, { backgroundColor: theme.inputBg }]}
-                      onPress={() => setFormVisible(true)}
-                    >
-                      <Text style={[styles.addButtonText, { color: theme.textPlaceholder }]}>
-                        Create a new todo...
-                      </Text>
-                    </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.addButton, { backgroundColor: theme.inputBg }]}
+                  onPress={() => setFormVisible(true)}
+                >
+                  <Text style={[styles.addButtonText, { color: theme.textPlaceholder }]}>
+                    Create a new todo...
+                  </Text>
+                </TouchableOpacity>
               </View>
             </SafeAreaView>
           </LinearGradient>
@@ -161,54 +175,59 @@ export default function TodoScreen() {
                 </View>
               ) : (
                 <>
-                  <View style={styles.todoContainer}>
-                    <DraggableFlatList
-                      data={filteredTodos}
-                      renderItem={renderTodoItem}
-                      keyExtractor={item => item._id}
-                      onDragEnd={handleDragEnd}
-                      contentContainerStyle={styles.todoList}
-                      showsVerticalScrollIndicator={false}
-                    />
+                  <DraggableFlatList
+                    data={filteredTodos}
+                    renderItem={renderTodoItem}
+                    keyExtractor={item => item._id}
+                    onDragEnd={handleDragEnd}
+                    showsVerticalScrollIndicator={true}
+                    containerStyle={styles.flatListContainer}
+                    contentContainerStyle={styles.flatListContent}
+                    
+                  />
 
+                  <View style={styles.bottomSection}>
                     <View style={styles.stats}>
                       <Text style={[styles.statsText, { color: theme.textTertiary }]}>
                         {stats.active} items left
                       </Text>
-                      <TouchableOpacity>
+                      <TouchableOpacity onPress={handleClearCompleted}>
                         <Text style={[styles.clearCompleted, { color: theme.textTertiary }]}>
                           Clear Completed
                         </Text>
                       </TouchableOpacity>
                     </View>
-                    <View style={styles.filters}>
-                      {(['all', 'active', 'completed'] as const).map(f => (
-                        <TouchableOpacity
-                          key={f}
-                          onPress={() => setFilter(f)}
-                          style={styles.filterBtn}
-                        >
-                          <Text style={[
-                            styles.filterText,
-                            { color: filter === f ? theme.filterActive : theme.filterInactive },
-                            filter === f && styles.filterTextActive
-                          ]}>
-                            {f.charAt(0).toUpperCase() + f.slice(1)}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
 
-                    <Text style={[styles.dragHint, { color: theme.textTertiary }]}>
-                      Drag and drop to reorder list
-                    </Text>
 
-                    
                   </View>
                 </>
               )}
-
             </View>
+
+            <View style={[styles.filterContainer, { backgroundColor: mode === 'light' ? '#F5F5F5' : mode === 'dark' ? '#1a1a1a' : '#F5F5F5' }]}>
+              <View style={styles.filters}>
+                {(['all', 'active', 'completed'] as const).map(f => (
+                  <TouchableOpacity
+                    key={f}
+                    onPress={() => setFilter(f)}
+                    style={styles.filterBtn}
+                  >
+                    <Text style={[
+                      styles.filterText,
+                      { color: filter === f ? theme.filterActive : theme.filterInactive },
+                      filter === f && styles.filterTextActive
+                    ]}>
+                      {f.charAt(0).toUpperCase() + f.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={[styles.dragHint, { color: theme.textTertiary }]}>
+                Drag and drop to reorder list
+              </Text>
+            </View>
+
           </View>
         </View>
 
@@ -237,6 +256,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  safeArea: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+  },
   headerWrapper: {
     width: '100%',
     maxWidth: 540,
@@ -262,20 +286,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  safeArea: {
-    flex: 1,
-    width: '100%',
-    alignItems: 'center',
-  },
-  searchContainer: {
+  addButton: {
     borderRadius: 5,
-    marginBottom: 20,
-    paddingHorizontal: 18,
     paddingVertical: 18,
+    paddingHorizontal: 18,
+    marginBottom: 20,
   },
-  searchInput: {
+  addButtonText: {
     fontSize: 18,
-    fontWeight: '400',
   },
   contentArea: {
     flex: 1,
@@ -291,15 +309,22 @@ const styles = StyleSheet.create({
   contentCard: {
     flex: 1,
     borderRadius: 5,
+   marginTop:
+      Platform.OS === 'web'
+        ? (width > 768 ? -70 : -60)  // Example for wide vs narrow browser
+        : -50, // mobile default
+    overflow: 'hidden',
+  },
+  flatListContainer: {
+    maxHeight: '90%',
+  },
+  flatListContent: {
     padding: 20,
-    marginTop: -70,
+    paddingBottom: 5,
   },
-  todoContainer: {
-    flex: 1,
-  },
-  todoList: {
-    flexGrow: 1,  // Change from just paddingBottom
-    paddingBottom: 10,
+  bottomSection: {
+    paddingHorizontal: 20,
+    paddingBottom: 5,
   },
   emptyState: {
     flex: 1,
@@ -316,7 +341,6 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.05)',
-    marginTop: 10,
   },
   statsText: {
     fontSize: 14,
@@ -324,11 +348,18 @@ const styles = StyleSheet.create({
   clearCompleted: {
     fontSize: 14,
   },
+  filterContainer: {
+    flex: 1/3,
+    padding: 5,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   filters: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 20,
-    paddingVertical: 12,
+    gap: 10,
+    paddingVertical: 5,
   },
   filterBtn: {
     paddingVertical: 4,
@@ -345,13 +376,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 12,
   },
-  addButton: {
-    borderRadius: 5,
-    paddingVertical: 18,
-    paddingHorizontal: 18,
-    marginTop: 10,
-  },
-  addButtonText: {
-    fontSize: 18,
-  },
+  
 });

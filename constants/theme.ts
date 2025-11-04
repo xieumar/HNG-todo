@@ -11,7 +11,11 @@ export const lightTheme = {
   textSecondary: '#6B7280',
   textTertiary: '#9CA3AF',
   textPlaceholder: '#D1D5DB',
-  
+
+  //scrolbar
+  scrollbarThumb: '#999',
+  scrollbarTrack: '#EEE',
+
   // Primary
   primary: '#6366F1',
   primaryLight: '#818CF8',
@@ -47,6 +51,10 @@ export const darkTheme = {
   textSecondary: '#D1D5DB',
   textTertiary: '#9CA3AF',
   textPlaceholder: '#6B7280',
+
+  //scrollbar
+  scrollbarThumb: '#FFF',
+  scrollbarTrack: '#333',
   
   // Primary
   primary: '#818CF8',
