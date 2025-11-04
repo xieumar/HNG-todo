@@ -3,7 +3,8 @@ import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { ThemeProvider } from '../hooks/useTheme';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
+const convexurl = "https://handsome-buffalo-574.convex.cloud";
+const convex = new ConvexReactClient( convexurl!, {
   unsavedChangesWarning: false,
 });
 

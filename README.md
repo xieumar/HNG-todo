@@ -1,50 +1,122 @@
-# Welcome to your Expo app 👋
+# Todo App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern, feature-rich Todo List application built with React Native (Expo) and Convex. This application provides a seamless and real-time experience for managing your tasks, with a beautiful UI, light and dark themes, and offline support.
 
-## Get started
+![Todo App Screenshot](https://example.com/screenshot.png) 
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **Real-time CRUD Operations:** Create, read, update, and delete todos with changes reflected instantly across all devices.
+- **Drag-and-Drop Sorting:** Easily reorder your todos with a smooth drag-and-drop interface.
+- **Light & Dark Themes:** Switch between light and dark modes to suit your preference. The app respects your system settings by default.
+- **Search & Filtering:** Quickly find todos with the built-in search functionality and filter by "All," "Active," and "Completed" statuses.
+- **Offline Support:** The app detects when you're offline and provides feedback to the user.
+- **User-Friendly Interface:** A clean and intuitive UI/UX for a great user experience.
+- **Toast Notifications:** Get instant feedback for actions like creating, updating, or deleting todos.
 
-2. Start the app
+## Tech Stack
 
-   ```bash
-   npx expo start
-   ```
+- **Frontend:**
+  - React Native
+  - Expo
+  - TypeScript
+- **Backend:**
+  - Convex (Real-time database)
+- **Navigation:**
+  - Expo Router
+- **UI/UX:**
+  - `react-native-draggable-flatlist` for drag-and-drop
+  - `react-native-toast-message` for notifications
+  - Custom-built UI components
 
-In the output, you'll find options to open the app in a
+## Getting Started
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Prerequisites
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Node.js (LTS version recommended)
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli`)
 
-## Get a fresh project
+### Installation
 
-When you're ready, run:
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/todo-app.git
+    cd todo-app
+    ```
 
-```bash
-npm run reset-project
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+### Backend Setup (Convex)
+
+1.  **Create a Convex project:**
+    - Sign up for a free Convex account at [convex.dev](https://www.convex.dev/).
+    - Create a new project in the Convex dashboard.
+
+2.  **Configure the Convex URL:**
+    - In the `convex/` directory, run `npx convex deploy` to deploy your backend functions.
+    - Get your project's URL from the Convex dashboard.
+    - Open `app/_layout.tsx` and replace the `convexurl` with your Convex project URL:
+      ```typescript
+      const convexurl = "YOUR_CONVEX_URL";
+      ```
+
+### Running the Application
+
+- **Start the development server:**
+  ```bash
+  npm start
+  ```
+  This will open the Expo developer tools in your browser. You can then:
+  - Scan the QR code with the Expo Go app on your Android or iOS device.
+  - Run on an Android emulator by pressing `a`.
+  - Run on an iOS simulator by pressing `i`.
+
+- **Run directly on a specific platform:**
+  ```bash
+  npm run android
+  npm run ios
+  npm run web
+  ```
+
+## Project Structure
+
+```
+.
+├── app/              # Main application screens and navigation (using Expo Router)
+├── assets/           # Static assets like fonts and images
+├── components/       # Reusable UI components
+├── constants/        # Theme and other constant values
+├── convex/           # Convex backend functions and schema
+├── hooks/            # Custom React hooks
+├── scripts/          # Helper scripts
+├── README.md         # This file
+└── package.json      # Project dependencies and scripts
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Available Scripts
 
-## Learn more
+- `npm start`: Starts the Expo development server.
+- `npm run android`: Runs the app on a connected Android device or emulator.
+- `npm run ios`: Runs the app on the iOS simulator.
+- `npm run web`: Runs the app in a web browser.
+- `npm run lint`: Lints the project files using ESLint.
+- `npm run reset-project`: Resets the project to a blank state (moves starter code to `app-example`).
 
-To learn more about developing your project with Expo, look at the following resources:
+## Contributing
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request.
 
-## Join the community
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature/your-feature`).
+3.  Make your changes.
+4.  Commit your changes (`git commit -m 'Add some feature'`).
+5.  Push to the branch (`git push origin feature/your-feature`).
+6.  Open a pull request.
 
-Join our community of developers creating universal apps.
+## License
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

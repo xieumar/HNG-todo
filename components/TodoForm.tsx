@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, Modal, StyleSheet,
-  KeyboardAvoidingView, Platform
+  KeyboardAvoidingView, Platform, ScrollView
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,12 +16,27 @@ interface TodoFormProps {
 
 export const TodoForm = ({ visible, onClose, onSubmit, initialData }: TodoFormProps) => {
   const { theme } = useTheme();
-  const [title, setTitle] = useState(initialData?.title || '');
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [dueDate, setDueDate] = useState<Date | undefined>(
-    initialData?.dueDate ? new Date(initialData.dueDate) : undefined
-  );
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
   const [showDatePicker, setShowDatePicker] = useState(false);
+
+  // Update form fields when modal opens or initialData changes
+  useEffect(() => {
+    if (visible) {
+      if (initialData) {
+        // Editing existing todo
+        setTitle(initialData.title || '');
+        setDescription(initialData.description || '');
+        setDueDate(initialData.dueDate ? new Date(initialData.dueDate) : undefined);
+      } else {
+        // Creating new todo
+        setTitle('');
+        setDescription('');
+        setDueDate(undefined);
+      }
+    }
+  }, [visible, initialData]);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -34,9 +49,11 @@ export const TodoForm = ({ visible, onClose, onSubmit, initialData }: TodoFormPr
   };
 
   const handleClose = () => {
+    // Clear form state
     setTitle('');
     setDescription('');
     setDueDate(undefined);
+    setShowDatePicker(false);
     onClose();
   };
 
@@ -44,101 +61,108 @@ export const TodoForm = ({ visible, onClose, onSubmit, initialData }: TodoFormPr
     <Modal visible={visible} animationType="slide" transparent>
       <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior={Platform.OS === 'android' ? 'padding' : 'height'}
           style={styles.keyboardView}
+          keyboardVerticalOffset={Platform.OS === 'android' ? 0 : 20}
         >
-          <View style={[styles.container, { backgroundColor: theme.surface }]}>
-            <View style={styles.header}>
-              <Text style={[styles.headerTitle, { color: theme.text }]}>
-                {initialData ? 'Edit Todo' : 'Create a new todo'}
-              </Text>
-              <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-                <Ionicons name="close" size={24} color={theme.icon} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.form}>
-              <TextInput
-                style={[
-                  styles.input, 
-                  { 
-                    backgroundColor: theme.inputBg, 
-                    color: theme.text,
-                    borderColor: theme.border 
-                  }
-                ]}
-                value={title}
-                onChangeText={setTitle}
-                placeholder="Todo title"
-                placeholderTextColor={theme.textPlaceholder}
-                autoFocus
-              />
-
-              <TextInput
-                style={[
-                  styles.input, 
-                  styles.textArea, 
-                  { 
-                    backgroundColor: theme.inputBg, 
-                    color: theme.text,
-                    borderColor: theme.border 
-                  }
-                ]}
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Description (optional)"
-                placeholderTextColor={theme.textPlaceholder}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-              />
-
-              <TouchableOpacity
-                style={[
-                  styles.dateButton, 
-                  { 
-                    backgroundColor: theme.inputBg,
-                    borderColor: theme.border 
-                  }
-                ]}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Ionicons name="calendar-outline" size={20} color={theme.iconSecondary} />
-                <Text style={[styles.dateText, { color: dueDate ? theme.text : theme.textPlaceholder }]}>
-                  {dueDate ? dueDate.toLocaleDateString() : 'Set due date (optional)'}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={[styles.container, { backgroundColor: theme.surface }]}>
+              <View style={styles.header}>
+                <Text style={[styles.headerTitle, { color: theme.text }]}>
+                  {initialData ? 'Edit Todo' : 'Create a new todo'}
                 </Text>
-              </TouchableOpacity>
+                <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
+                  <Ionicons name="close" size={24} color={theme.icon} />
+                </TouchableOpacity>
+              </View>
 
-              {showDatePicker && (
-                <DateTimePicker
-                  value={dueDate || new Date()}
-                  mode="date"
-                  display="default"
-                  onChange={(e, date) => {
-                    setShowDatePicker(false);
-                    if (date) setDueDate(date);
-                  }}
+              <View style={styles.form}>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    { 
+                      backgroundColor: theme.inputBg, 
+                      color: theme.text,
+                      borderColor: theme.border 
+                    }
+                  ]}
+                  value={title}
+                  onChangeText={setTitle}
+                  placeholder="Todo title"
+                  placeholderTextColor={theme.textPlaceholder}
+                  autoFocus
                 />
-              )}
-            </View>
 
-            <View style={styles.footer}>
-              <TouchableOpacity
-                style={[
-                  styles.button, 
-                  styles.submitButton, 
-                  { backgroundColor: theme.primary },
-                  !title.trim() && { opacity: 0.5 }
-                ]}
-                onPress={handleSubmit}
-                disabled={!title.trim()}
-              >
-                <Text style={styles.submitButtonText}>
-                  {initialData ? 'Update' : 'Add Todo'}
-                </Text>
-              </TouchableOpacity>
+                <TextInput
+                  style={[
+                    styles.input, 
+                    styles.textArea, 
+                    { 
+                      backgroundColor: theme.inputBg, 
+                      color: theme.text,
+                      borderColor: theme.border 
+                    }
+                  ]}
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder="Description (optional)"
+                  placeholderTextColor={theme.textPlaceholder}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                />
+
+                <TouchableOpacity
+                  style={[
+                    styles.dateButton, 
+                    { 
+                      backgroundColor: theme.inputBg,
+                      borderColor: theme.border 
+                    }
+                  ]}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <Ionicons name="calendar-outline" size={20} color={theme.iconSecondary} />
+                  <Text style={[styles.dateText, { color: dueDate ? theme.text : theme.textPlaceholder }]}>
+                    {dueDate ? dueDate.toLocaleDateString() : 'Set due date (optional)'}
+                  </Text>
+                </TouchableOpacity>
+
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={dueDate || new Date()}
+                    mode="date"
+                    display="default"
+                    onChange={(e, date) => {
+                      setShowDatePicker(false);
+                      if (date) setDueDate(date);
+                    }}
+                  />
+                )}
+              </View>
+
+              <View style={styles.footer}>
+                <TouchableOpacity
+                  style={[
+                    styles.button, 
+                    styles.submitButton, 
+                    { backgroundColor: theme.primary },
+                    !title.trim() && { opacity: 0.5 }
+                  ]}
+                  onPress={handleSubmit}
+                  disabled={!title.trim()}
+                >
+                  <Text style={styles.submitButtonText}>
+                    {initialData ? 'Update' : 'Add Todo'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </View>
     </Modal>
@@ -155,6 +179,9 @@ const styles = StyleSheet.create({
   keyboardView: {
     width: '100%',
     maxWidth: 500,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   container: {
     borderRadius: 12,
