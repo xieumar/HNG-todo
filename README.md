@@ -2,7 +2,7 @@
 
 A modern, feature-rich Todo List application built with React Native (Expo) and Convex. This application provides a seamless and real-time experience for managing your tasks, with a beautiful UI, light and dark themes, and offline support.
 
-![Todo App Screenshot](https://example.com/screenshot.png) 
+
 
 ## Features
 
